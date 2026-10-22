@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section>
+  <article>
+    <h1>Make a reservation</h1>
+    <div class="row">
+      <div class="column">
+        <form id="booking-form">
+          {% csrf_token %}
+          <p>
+            <label for="first_name">Name:</label>
+            <input
+              type="text"
+              id="first_name"
+              name="first_name"
+              placeholder="Your Name"
+              maxlength="200"
+              required
+            >
+          </p>
+          <p>
+            <label for="reservation_date">Reservation date:</label>
+            <input
+              type="date"
+              id="reservation_date"
+              name="reservation_date"
+              value="{{ today|date:'Y-m-d' }}"
+              required
+            >
+          </p>
+          <p>
+            <label for="reservation_slot">Reservation time:</label>
+            <select id="reservation_slot" name="reservation_slot" required>
+              <option value="">Select time</option>
+            </select>
+          </p>
+          <button type="submit" id="button">Reserve</button>
+          <p id="form-message" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+      <div class="column">
+        <h2>Bookings For <span id="today">{{ today|date:'Y-m-d' }}</span></h2>
+        <div id="bookings"><p>No bookings</p></div>
+      </div>
+    </div>
+  </article>
+</section>
+
+{{ reservation_slots|json_script:"reservation-slots" }}
+
+<script>
+  const bookingUrl = "{% url 'bookings' %}";
+  const bookingForm = document.getElementById('booking-form');
+  const dateInput = document.getElementById('reservation_date');
+  const timeSelect = document.getElementById('reservation_slot');
+  const bookingList = document.getElementById('bookings');
+  const statusMessage = document.getElementById('form-message');
+  const slots = JSON.parse(
+    document.getElementById('reservation-slots').textContent
+  );
+
+  function formatTime(hour) {
+    const hour12 = hour % 12 || 12;
+    const period = hour < 12 ? 'AM' : 'PM';
+    return `${hour12} ${period}`;
+  }
+
+  function showBookings(bookings) {
+    bookingList.replaceChildren();
+
+    if (bookings.length === 0) {
+      const emptyMessage = document.createElement('p');
+      emptyMessage.textContent = 'No bookings';
+      bookingList.append(emptyMessage);
+    }
+
+    for (const booking of bookings) {
+      const row = document.createElement('p');
+      row.textContent =
+        `${booking.fields.first_name} - ` +
+        formatTime(Number(booking.fields.reservation_slot));
+      bookingList.append(row);
+    }
+
+    const reservedSlots = new Set(
+      bookings.map((booking) => Number(booking.fields.reservation_slot))
+    );
+    timeSelect.replaceChildren(new Option('Select time', ''));
+
+    for (const [hour, label] of slots) {
+      const option = new Option(label, hour);
+      option.disabled = reservedSlots.has(Number(hour));
+      timeSelect.add(option);
+    }
+  }
+
+  async function loadBookings() {
+    const selectedDate = dateInput.value;
+    document.getElementById('today').textContent = selectedDate;
+
+    const query = new URLSearchParams({ date: selectedDate });
+    const response = await fetch(`${bookingUrl}?${query}`);
+    if (!response.ok) {
+      throw new Error('Could not load bookings for that date.');
+    }
+
+    showBookings(await response.json());
+  }
+
+  dateInput.addEventListener('change', () => {
+    statusMessage.textContent = '';
+    loadBookings().catch((error) => {
+      statusMessage.textContent = error.message;
+    });
+  });
+
+  bookingForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    statusMessage.textContent = '';
+
+    const submitButton = bookingForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
+    try {
+      const response = await fetch(bookingUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': bookingForm.querySelector(
+            '[name="csrfmiddlewaretoken"]'
+          ).value,
+        },
+        body: JSON.stringify({
+          first_name: document.getElementById('first_name').value,
+          reservation_date: dateInput.value,
+          reservation_slot: timeSelect.value,
+        }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        const errors = result.errors
+          ? Object.values(result.errors)
+              .flat()
+              .map((error) => error.message)
+          : [result.error];
+        const message =
+          errors.filter(Boolean).join(' ') || 'Booking failed.';
+
+        if (response.status === 400 || response.status === 409) {
+          await loadBookings();
+        }
+
+        throw new Error(message);
+      }
+
+      document.getElementById('first_name').value = '';
+      statusMessage.textContent = 'Your reservation has been saved.';
+      await loadBookings();
+    } catch (error) {
+      statusMessage.textContent = error.message;
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+
+  loadBookings().catch((error) => {
+    statusMessage.textContent = error.message;
+  });
+</script>
+{% endblock %}

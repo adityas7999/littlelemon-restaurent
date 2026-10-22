@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section>
+  <article>
+    <h1>User Registration</h1>
+    <p>Create an account to reserve tables and manage bookings at Little Lemon.</p>
+    <div class="row">
+      <div class="column" style="max-width: 480px;">
+        <form method="POST" action="">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" id="button">Register</button>
+        </form>
+      </div>
+    </div>
+  </article>
+</section>
+{% endblock %}
