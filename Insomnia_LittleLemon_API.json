@@ -1,0 +1,214 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-10-22T15:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "wrk_littlelemon",
+      "_type": "workspace",
+      "parentId": null,
+      "modified": 1729609200000,
+      "created": 1729609200000,
+      "name": "Little Lemon Restaurant API",
+      "description": "Meta Back-End Developer Capstone - Little Lemon Restaurant API Testing Suite",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_littlelemon",
+      "_type": "environment",
+      "parentId": "wrk_littlelemon",
+      "modified": 1729609200000,
+      "created": 1729609200000,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://127.0.0.1:8000",
+        "token": "4dc154bc04e4d4671f477ede636fa96b1776cd0d"
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url", "token"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1729609200000
+    },
+    {
+      "_id": "req_register",
+      "_type": "request",
+      "parentId": "wrk_littlelemon",
+      "modified": 1729609200000,
+      "created": 1729609200000,
+      "url": "{{ _.base_url }}/api/registration/",
+      "name": "1. User Registration",
+      "description": "Register a new user account with Little Lemon API",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"testuser_insomnia\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"SecurePass2026!\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -100
+    },
+    {
+      "_id": "req_login",
+      "_type": "request",
+      "parentId": "wrk_littlelemon",
+      "modified": 1729609200000,
+      "created": 1729609200000,
+      "url": "{{ _.base_url }}/api/token/login/",
+      "name": "2. Obtain Auth Token",
+      "description": "Obtain authentication token for subsequent requests",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"admin\",\n  \"password\": \"LemonAdmin2026!\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -90
+    },
+    {
+      "_id": "req_menu_list",
+      "_type": "request",
+      "parentId": "wrk_littlelemon",
+      "modified": 1729609200000,
+      "created": 1729609200000,
+      "url": "{{ _.base_url }}/api/menu-items/",
+      "name": "3. Get All Menu Items",
+      "description": "List all food menu items",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -80
+    },
+    {
+      "_id": "req_menu_create",
+      "_type": "request",
+      "parentId": "wrk_littlelemon",
+      "modified": 1729609200000,
+      "created": 1729609200000,
+      "url": "{{ _.base_url }}/api/menu-items/",
+      "name": "4. Create Menu Item (Token Auth)",
+      "description": "Add a new menu item using Token authorization",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Mediterranean Lemon Chicken\",\n  \"price\": \"18.50\",\n  \"inventory\": 15\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Token {{ _.token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -70
+    },
+    {
+      "_id": "req_menu_single",
+      "_type": "request",
+      "parentId": "wrk_littlelemon",
+      "modified": 1729609200000,
+      "created": 1729609200000,
+      "url": "{{ _.base_url }}/api/menu-items/1/",
+      "name": "5. Get Single Menu Item",
+      "description": "Retrieve menu item details by ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -60
+    },
+    {
+      "_id": "req_booking_list",
+      "_type": "request",
+      "parentId": "wrk_littlelemon",
+      "modified": 1729609200000,
+      "created": 1729609200000,
+      "url": "{{ _.base_url }}/api/bookings/",
+      "name": "6. Get All Bookings (Token Auth)",
+      "description": "List table reservations (Secured - requires Token Auth)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Token {{ _.token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -50
+    },
+    {
+      "_id": "req_booking_create",
+      "_type": "request",
+      "parentId": "wrk_littlelemon",
+      "modified": 1729609200000,
+      "created": 1729609200000,
+      "url": "{{ _.base_url }}/api/bookings/",
+      "name": "7. Create Table Booking (Token Auth)",
+      "description": "Insert booking data in database via table booking API",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Peer Reviewer\",\n  \"no_of_guests\": 4,\n  \"booking_date\": \"2026-11-25T19:30:00Z\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Token {{ _.token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -40
+    },
+    {
+      "_id": "req_booking_single",
+      "_type": "request",
+      "parentId": "wrk_littlelemon",
+      "modified": 1729609200000,
+      "created": 1729609200000,
+      "url": "{{ _.base_url }}/api/bookings/1/",
+      "name": "8. Get Single Booking (Token Auth)",
+      "description": "Retrieve table booking details by ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Token {{ _.token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -30
+    }
+  ]
+}
